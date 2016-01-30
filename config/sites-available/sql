@@ -1,0 +1,63 @@
+server sql {
+	authorize {
+		preprocess
+		auth_log
+		chap
+		mschap
+		digest
+		suffix
+		eap {
+			ok = return
+		}
+		sql
+		expiration
+		logintime
+		pap
+	}
+	authenticate {
+		Auth-Type PAP {
+			pap
+		}
+
+		Auth-Type CHAP {
+			chap
+		}
+		Auth-Type MS-CHAP {
+			mschap
+		}
+		digest
+		eap
+	}
+	preacct {
+		preprocess
+		acct_unique
+		suffix
+		files
+	}
+	accounting {
+		detail
+		sql
+
+		exec
+		attr_filter.accounting_response
+
+	}
+
+	session {
+		sql
+	}
+
+
+	post-auth {
+		sql
+		exec
+		Post-Auth-Type REJECT {
+			sql
+			attr_filter.access_reject
+		}
+	}
+
+	post-proxy {
+		eap
+	}
+}
