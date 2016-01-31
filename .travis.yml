@@ -10,7 +10,6 @@ before_install:
   - docker run -d -e "MYSQL_ROOT_PASSWORD=verysecret" --name mysqldb1 mysql:5.6 
   - docker ps -a
   - docker build -t realworld/docker-radius .
-  - docker run --link mysqldb1:mysql -e "MYSQL_ROOT_PASSWORD=verysecret" realworld/docker-radius /bin/bash /usr/src/build/test-radius.sh
 
 script:
-  - /usr/src/build/test-radius.sh
+  - docker run --link mysqldb1:mysql -e "MYSQL_ROOT_PASSWORD=verysecret" realworld/docker-radius /bin/bash /usr/src/build/test-radius.sh
