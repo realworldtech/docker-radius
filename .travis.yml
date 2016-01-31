@@ -16,3 +16,6 @@ script:
   - docker exec "radius1" /bin/bash /usr/src/build/test-radius.sh
   - docker exec "radius1" /bin/bash /usr/src/build/load-test-data.sh
   - docker exec "radius1" radtest test@testing.com testing123 127.0.0.1 0 testing123
+
+after_success:
+  - curl -H "Content-Type: application/json" --data '{"docker_tag": "master"}' -X POST https://registry.hub.docker.com/u/realworld/radius/trigger/$DOCKERHUB_ID/
