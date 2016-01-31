@@ -1,0 +1,16 @@
+sudo: required
+services:
+  - docker
+
+environment:
+  MYSQL_ROOT_PASSWORD: verysecret
+
+before_install:
+  - docker pull mysql:5.6
+  - docker run -d --name mysqldb1 mysql:5.6 
+  - docker ps -a
+  - docker build -t realworld/docker-radius .
+  - docker run --link mysqldb1:mysql realworld/docker-radius /bin/bash /usr/src/build/test-radius.sh
+
+script:
+  - /usr/src/build/test-radius.sh
