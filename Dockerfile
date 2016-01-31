@@ -6,8 +6,8 @@ MAINTAINER Andrew Yager <andrew@rwts.com.au>
 RUN apt-get update && apt-get install -y apache2  php5 php5-cli php5-gd php5-mcrypt php5-mysql mysql-client cron
 RUN apt-get update && apt-get install -y freeradius freeradius-mysql freeradius-utils
 
-EXPOSE 1812
-EXPOSE 1813
+EXPOSE 1812/udp
+EXPOSE 1813/udp
 
 RUN mkdir -p /usr/src/build
 RUN mkdir /usr/src/build/sql
