@@ -12,7 +12,7 @@ before_install:
   - docker build -t realworld/docker-radius .
   - docker run --link mysqldb1:mysql -p 1812:1812/udp -p 1813:1813/udp -d -e "MYSQL_ROOT_PASSWORD=verysecret" realworld/docker-radius
   - sudo apt-get update -qq
-  - sudo apt-get install freeradius-utils
+  - sudo apt-get install -y freeradius-utils
 
 script:
   - docker run --link mysqldb1:mysql -e "MYSQL_ROOT_PASSWORD=verysecret" realworld/docker-radius /bin/bash /usr/src/build/test-radius.sh
