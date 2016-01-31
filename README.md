@@ -1,6 +1,8 @@
 # docker-radius
 RADIUS Docker Image
 
+![build status](https://api.travis-ci.org/realworldtech/docker-radius.svg?branch=master)
+
 This is yet another Docker FreeRADIUS 2 image with SQL support.
 
 This image implements a sensible SQL schema with added tables to support period-based accounting.
