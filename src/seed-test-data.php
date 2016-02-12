@@ -4,14 +4,13 @@
     date_default_timezone_set('UTC');
 
     // initialization
-    $quota = 1073741824000;
-    $quota_date = '2015-09-17 00:00:00';
-    $anniversary_day = 8;
+    $quota = 0;
+    $quota_date = "";
     $action = "shape";
     $status = "normal";
-    $account_sessiontime = 150;
-    $account_inputoctects = 5571;
-    $accout_outputoctects = 45599;
+    $account_sessiontime = 1000;
+    $account_inputoctects = 5000;
+    $accout_outputoctects = 10000;
     $today = date("Y-m-d H:i:s");
 
     $longopts  = array(
@@ -19,32 +18,54 @@
         "password:",
         "startdate:",
         "enddate::",
-        "total:",
+        "totalgb:",
+        "nasip:",
+        "quotagb::",
+        "quotadate::",
+        "annivsday::"
     );
     $options = getopt("", $longopts);
-    if(!isset($options["username"]) || !isset($options["password"]) || !isset($options["startdate"]) || !isset($options["total"]))
-        die('Please input the required parameters. ex. --username=test@testing.com --password=testing123 --startdate="2016-01-01" --enddate="2016-02-01" --total=10'."\r\n");
 
-    var_dump($options);
+    // check mandatory options
+    if(!isset($options["username"]) || !isset($options["password"]) || !isset($options["startdate"]) || !isset($options["totalgb"]) || !isset($options["nasip"]))
+        die('Please input the required parameters. ex. --username=test@testing.com --password=testing123 --startdate="2016-01-01" --enddate="2016-02-01" --totalgb=10 --nasip="3.3.3.3" --quotagb=10 --quotadate="2016-01-01" --annivsday=1'.PHP_EOL);
+
+    //var_dump($options);
 
     $username = $options["username"];
     $password = $options["password"];
     $start_date = date("Y-m-d H:i:s", strtotime($options["startdate"]));
-    $end_date = $options["enddate"] != "" ? date("Y-m-d H:i:s", strtotime($options["enddate"])) : $today;
-    $total_amount = $options["total"] * 1073741824; // Giga to byte
+    $total_amount = $options["totalgb"] * 1073741824; // Giga to byte
+    $nasip = $options["nasip"];
+
+    if(isset($options["enddate"]))
+        $end_date = date("Y-m-d H:i:s", strtotime($options["enddate"]));
+    else
+        $end_date = $today;
+
+    if(isset($options["quotagb"]))
+        $quota = $options["quotagb"] * 1073741824; // Giga to byte
+
+    if(isset($options["quotadate"]))
+        $quota_date = date("Y-m-d H:i:s", strtotime($options["quotadate"]));
+
+    if(isset($options["annivsday"]))
+        $anniversary_day = $options["annivsday"];
+    else
+        $anniversary_day = date("d", strtotime($options["startdate"]));
 
     $account_starttime = $start_date;
     $account_endtime = $end_date;
 
-    echo $today."\r\n";
-    echo $account_starttime."\r\n";
-    echo $account_endtime."\r\n";
+    //echo $today.PHP_EOL;
+    //echo $account_starttime.PHP_EOL;
+    //echo $account_endtime.PHP_EOL;
 
     $db = new mysqli("mysql", "radius", "radius", "radius");
 
     // update radcheck
     $query = "INSERT into `radcheck` (`username`, `attribute`, `op`, `value`) values('$username', 'Cleartext-Password', ':=', '$password')";
-    echo $query."\r\n";
+    echo $query.PHP_EOL;
     $result = $db->query($query);
     if (!$result) {
         die($db->error);
@@ -52,7 +73,7 @@
 
     // update userinfo
     $query = "INSERT into `userinfo` (`username`) values('$username')";
-    echo $query."\r\n";
+    echo $query.PHP_EOL;
     $result = $db->query($query);
     if (!$result) {
         die($db->error);
@@ -60,29 +81,36 @@
 
     // update user_billing_detail
     $query = "INSERT into `user_billing_detail` (`username`, `anniversary_day`, `action`, `status`) values('$username', '$anniversary_day', '$action', '$status')";
-    echo $query."\r\n";
+    echo $query.PHP_EOL;
     $result = $db->query($query);
     if (!$result) {
         die($db->error);
     }
 
     // update user_quota
-    $query = "INSERT into `user_quota` (`username`, `quota_date`, `quota`) values('$username', '$quota_date', '$quota')";
-    echo $query."\r\n";
-    $result = $db->query($query);
-    if (!$result) {
-        die($db->error);
-    }
+    if($quota != 0 && $quota_date != "") {
+        $query = "INSERT into `user_quota` (`username`, `quota_date`, `quota`) values('$username', '$quota_date', '$quota')";
+        echo $query.PHP_EOL;
+        $result = $db->query($query);
+        if (!$result) {
+            die($db->error);
+        }
 
-    $result = $db->query("SET @disable_triggers = 1");
-    if (!$result) {
-        die($db->error);
+        $result = $db->query("SET @disable_triggers = 1");
+        if (!$result) {
+            die($db->error);
+        }
     }
 
     // update radacct session dummy row
+    $acctsessionid = bin2hex(openssl_random_pseudo_bytes(4));
+    $acctuniqueid = bin2hex(openssl_random_pseudo_bytes(8));
+    //echo "accsessionid: ".$acctsessionid.PHP_EOL;
+    //echo "acctuniqueid: ".$acctuniqueid.PHP_EOL;
+
     $query = "INSERT INTO `radacct` (`acctsessionid`, `acctuniqueid`, `UserName`, `GroupName`, `realm`, `NASIPAddress`, `NASPortId`, `nasporttype`, `AcctStartTime`, `AcctStopTime`, `AcctSessionTime`, `acctauthentic`, `connectinfo_start`, `connectinfo_stop`, `AcctInputOctets`, `AcctOutputOctets`, `CalledStationId`, `CallingStationId`, `acctterminatecause`, `servicetype`, `framedprotocol`, `FramedIPAddress`, `acctstartdelay`, `acctstopdelay`, `xascendsessionsvrkey`)
-        values('0004752B', '86716ad2a8b3d327', '$username', '', '', '114.141.96.4', '', 'ISDN', '$account_starttime', '$account_endtime', '$account_sessiontime', 'RADIUS', '155520000', '155520000', '$account_inputoctects', '$accout_outputoctects', '', 'foobar', 'Port-Error', 'Framed-User', 'PPP', '127.0.0.15', 0, 0, '')";
-    echo $query."\r\n";
+        values('$acctsessionid', '$acctuniqueid', '$username', '', '', '$nasip', '', 'ISDN', '$account_starttime', '$account_endtime', '$account_sessiontime', 'RADIUS', '155520000', '155520000', '$account_inputoctects', '$accout_outputoctects', '', 'foobar', 'Port-Error', 'Framed-User', 'PPP', '127.0.0.15', 0, 0, '')";
+    echo $query.PHP_EOL;
     $result = $db->query($query);
     if (!$result) {
         die($db->error);
@@ -106,15 +134,15 @@
     $dataout += floor($data_slice * 0.6);
     $totaldata = $datain + $dataout;
 
-    echo 'total: '.$total_amount."\r\n";
-    echo 'slice: '.$data_slice."\r\n";
+    //echo 'total: '.$total_amount.PHP_EOL;
+    //echo 'slice: '.$data_slice.PHP_EOL;
 
     while ($pointer <= $end) {
 
         $pointer = $pointer + 60*60;
         $data_hour = date('H', $pointer);
         $date = date('Y-m-d', $pointer);
-        echo $date.'-'.$data_hour."\r\n";
+        echo $date.' '.$data_hour.PHP_EOL;
         $stmt->execute();
 
     }

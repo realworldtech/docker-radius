@@ -24,7 +24,7 @@ COPY ./config/sql/mysql/dialup.conf /etc/freeradius/sql/mysql/dialup.conf
 RUN ln -s /etc/freeradius/sites-available/sql /etc/freeradius/sites-enabled/sql
 
 COPY ./src/load-test-data.sh /usr/src/build/load-test-data.sh
-COPY ./src/load-test-data.sh /usr/src/build/seed-test-data.php
+COPY ./src/seed-test-data.php /usr/src/build/seed-test-data.php
 COPY ./sql/test-data.sql /usr/src/build/sql/test-data.sql
 RUN chmod 755 /usr/src/build/load-test-data.sh
 RUN chmod 755 /usr/src/build/seed-test-data.php
