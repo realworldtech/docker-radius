@@ -95,11 +95,12 @@
         if (!$result) {
             die($db->error);
         }
+    }
 
-        $result = $db->query("SET @disable_triggers = 1");
-        if (!$result) {
-            die($db->error);
-        }
+    // diable triggers
+    $result = $db->query("SET @disable_triggers = 1");
+    if (!$result) {
+        die($db->error);
     }
 
     // update radacct session dummy row
@@ -130,23 +131,43 @@
     $pointer = strtotime($start_date);
 
     $data_slice = floor($total_amount / (abs($end - $start) / 3600));
-    $datain += floor($data_slice * 0.4);
-    $dataout += floor($data_slice * 0.6);
-    $totaldata = $datain + $dataout;
+    $datain = floor($data_slice * 0.4);
+    $dataout = $data_slice - $datain;
+    $totaldata = $data_slice;
 
     //echo 'total: '.$total_amount.PHP_EOL;
     //echo 'slice: '.$data_slice.PHP_EOL;
 
-    while ($pointer <= $end) {
+    $restdata = $total_amount;
+    while ($restdata > $data_slice) {
 
         $pointer = $pointer + 60*60;
         $data_hour = date('H', $pointer);
         $date = date('Y-m-d', $pointer);
         echo $date.' '.$data_hour.PHP_EOL;
         $stmt->execute();
+        if (!$stmt) {
+            die($db->error);
+        }
+
+        $restdata -= $data_slice;
 
     }
 
+    // process the rest
+    $datain = $restdata;
+    $dataout = 0;
+    $totaldata = $restdata;
+    $pointer = $pointer + 60*60;
+    $data_hour = date('H', $pointer);
+    $date = date('Y-m-d', $pointer);
+    echo $date.' '.$data_hour.' '.$totaldata.' '.$datain.PHP_EOL;
+    $stmt->execute();
+    if (!$stmt) {
+        die($db->error);
+    }
+
+    // enable triggers
     $result = $db->query("SET @disable_triggers = NULL");
     if (!$result) {
         die($db->error);

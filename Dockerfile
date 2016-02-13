@@ -25,9 +25,11 @@ RUN ln -s /etc/freeradius/sites-available/sql /etc/freeradius/sites-enabled/sql
 
 COPY ./src/load-test-data.sh /usr/src/build/load-test-data.sh
 COPY ./src/seed-test-data.php /usr/src/build/seed-test-data.php
+COPY ./src/seed-test-data.php /usr/src/build/test-seed.php
 COPY ./sql/test-data.sql /usr/src/build/sql/test-data.sql
 RUN chmod 755 /usr/src/build/load-test-data.sh
 RUN chmod 755 /usr/src/build/seed-test-data.php
+RUN chmod 755 /usr/src/build/test-seed.php
 RUN chmod 755 /usr/local/bin/summarise_data.php
 RUN ln -s /usr/local/bin/summarise_data.php /etc/cron.hourly/99.summarise_radius_data.php
 
