@@ -8,11 +8,13 @@
     );
     $options = getopt("", $longopts);
 
-    //var_dump($options);
+    var_dump($options);
 
     // check mandatory options
-    if(!isset($options["username"]) || !isset($options["password"]) || !isset($options["totalgb"]))
-        die('Please input the required parameters. ex. --username=test@testing.com --password=testig123 --totalgb=10'.PHP_EOL);
+    if(!isset($options["username"]) || !isset($options["password"]) || !isset($options["totalgb"])) {
+        echo 'Please input the required parameters. ex. --username=test@testing.com --password=testig123 --totalgb=10' . PHP_EOL;
+        exit(1);
+    }
 
     $username = $options["username"];
     $password = $options["password"];
