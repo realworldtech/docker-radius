@@ -17,7 +17,7 @@ before_install:
 script:
   - sleep 30
   - docker exec "radius1" /bin/bash /usr/src/build/test-radius.sh
-  - docker exec "radius1" /usr/bin/php /usr/src/build/seed-test-data.php --username=test@testing.com --password=testing123 --startdate="2016-01-01" --enddate="2016-02-01" --totalgb=10 --nasip="3.3.3.3" --quotagb=10 --quotadate="2016-01-01" --annivsday=1
+  - docker exec "radius1" /usr/bin/php /usr/src/build/seed-test-data.php --username=test@testing.com --password=testing123 --startdate="2016-01-01" --totalgb=10 --nasip="3.3.3.3" --quotagb=10 --quotadate="2016-01-01" --annivsday=1
   - docker exec "radius1" /usr/bin/php /usr/src/build/test-seed.php --username=test@testing.com --password=testing123 --totalgb=10
   - docker exec "radius1" radtest test@testing.com testing123 127.0.0.1 0 testing123
   - radtest test@testing.com testing123 127.0.0.1 0 password
